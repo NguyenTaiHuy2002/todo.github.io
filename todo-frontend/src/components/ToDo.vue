@@ -32,10 +32,10 @@
             :class="{ active: filterStatus === 'notCompleted' }"
             v-on:click="filterTaskNotComplete"
           >
-            Task not complete
+            Task not completed
           </button>
-          <button class="btn-filter" :class="{ active: filterStatus === 'hidden' }" v-on:click="filterTaskHidden">Hidden List</button>
-          <button class="btn-filter" v-on:click="resetFilter">Resert filter</button>
+          <button class="btn-filter" :class="{ active: filterStatus === 'hidden' }" v-on:click="filterTaskHidden">Hidden list</button>
+          <button class="btn-filter" v-on:click="resetFilter">Reset filter</button>
         </div>
 
         <div class="btn-filter-extend">

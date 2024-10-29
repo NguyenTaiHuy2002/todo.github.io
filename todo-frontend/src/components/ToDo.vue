@@ -4,7 +4,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
       rel="stylesheet"
     />
-    <h1 class="title mb-3">TODOS</h1>
+    <h1 class="title mb-3">TASK MANAGER</h1>
     <div class="input_todo">
       <input
         type="text"
@@ -18,7 +18,7 @@
     <div class="list_todo">
       <h3 class="mt-2">Todo List</h3>
       <div class="sub-list">
-        <div class="btns-filter mb-3">
+        <div class="btns-filter mb-3" v-if="!isMobile">
           <span>Filter:</span>
           <button
             class="btn-filter"
@@ -37,8 +37,27 @@
           <button class="btn-filter" :class="{ active: filterStatus === 'hidden' }" v-on:click="filterTaskHidden">Hidden list</button>
           <button class="btn-filter" v-on:click="resetFilter">Reset filter</button>
         </div>
+        
+        <div class="btns-filter-mobile mb-3" v-if="isMobile">
+          <span>Filter:</span>
+          <span class="btn-choose-type" @click="toggleFilterMobile" :class="{ isActivedFilterMobile: isOpenFilterGroupMobile }" >Choose type filter <i class="fa-solid fa-chevron-down"></i></span>
+          <ul class="btns-filter-group" @click="toggleFilterMobile" v-if="isOpenFilterGroupMobile">
+            <li>
+              <button class="btn-filter mb-2 w-100" :class="{ active: filterStatus === 'completed' }" v-on:click="filterTaskComplete">Task completed</button>
+            </li>
+            <li>
+              <button class="btn-filter mb-2 w-100" :class="{ active: filterStatus === 'notCompleted' }" v-on:click="filterTaskNotComplete">Task not completed</button>
+            </li>
+            <li>
+              <button class="btn-filter mb-2 w-100" :class="{ active: filterStatus === 'hidden' }" v-on:click="filterTaskHidden">Hidden list</button>
+            </li>
+            <li>
+              <button class="btn-filter mb-2 w-100" v-on:click="resetFilter">Reset filter</button>
+            </li>
+          </ul>
+        </div>
 
-        <div class="btn-filter-extend">
+        <div class="btn-filter-extend mb-3">
           
           <span
             @click="toggleFilterExtend"
@@ -86,9 +105,8 @@
       <template #item="{ element }">
         <transition-group name="slide" tag="ul" class="list">
           <li :key="element.id" class="item">
+            <input type="checkbox" v-model="element.completed" @change="updatedItem(element)" />
             <div class="item-content">
-              <input type="checkbox" v-model="element.completed" @change="updatedItem(element)" />
-
               <div class="edit-item" v-if="isEditing(element)">
                 <input type="text" v-model="editedItemTittle" @keyup.enter="updatedItem(element)" class="edit-input" />
                 <span class="btn-save" @click="updatedItem(element)">
@@ -98,7 +116,7 @@
 
               <span v-else class="px-2 item-tittle" :class="{ checked: element.completed }"> {{ element.tittle }} </span>
               &nbsp;
-              <span v-if="element.completed" class="complete-text">(Completed)</span>
+              <span v-if="element.completed" class="complete-text px-2">(Completed)</span>
             </div>
             <div class="button">
               <span class="mx-2 icon-pin" :class="{ isPinned: element.isPinned }" @click="togglePin(element)">
@@ -131,7 +149,7 @@
 </template>
 
 <script>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import {
   fetchTodos,
   addTodo,
@@ -162,12 +180,18 @@ export default {
 
     const editingItemId = ref(null); //item đang sửa
     const isOpenFilterExtend = ref(false); //đóng mở filter more
+    const isOpenFilterGroupMobile = ref(false); //đóng mở filter group moblie
     const keywordQuery = ref(""); // key search
     const searchResult = ref([]); // ds search
     const startDate = ref(""); 
     const endDate = ref("");
+    const isMobile = ref(window.innerWidth < 740);
     
     const toast = useToast();
+
+    const handleResize = () => {
+      isMobile.value = window.innerWidth < 740;
+    };
 
     // Computed
     const listItems = computed(() => {
@@ -365,6 +389,11 @@ export default {
       isOpenFilterExtend.value = !isOpenFilterExtend.value;
     };
 
+     // đóng mở filter more
+    const toggleFilterMobile = () => {
+      isOpenFilterGroupMobile.value = !isOpenFilterGroupMobile.value;
+    };
+
     // kéo thả item
     const onEnd = async (event) => {
       
@@ -416,7 +445,12 @@ export default {
       filterTaskNotComplete();
       filterTaskComplete();
       resetFilter();
+      window.addEventListener('resize', handleResize);
     });
+
+    onUnmounted(() => {
+      window.removeEventListener('resize', handleResize);
+    })
 
     return {
       inputValue, 
@@ -426,10 +460,12 @@ export default {
       editedItemTittle,
       hasItemCompleted,
       isOpenFilterExtend,
+      isOpenFilterGroupMobile,
       keywordQuery,
       startDate,
       endDate,
-      fetchAllTodos,
+      isMobile,
+      // fetchAllTodos,
       addItemTodo,
       editItem,
       updatedItem,
@@ -443,6 +479,7 @@ export default {
       resetFilter,
       togglePin,
       toggleFilterExtend,
+      toggleFilterMobile,
       searchItem,
       filterByDateToDate,
       onEnd,

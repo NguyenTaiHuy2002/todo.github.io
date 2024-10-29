@@ -3,10 +3,15 @@
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
     rel="stylesheet"
   />
+  <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+    />
 
   <div class="nav">
     <router-link to="/" class="nav-logo">TODOS</router-link>
-    <div class="nav-button">
+    <div class="nav-menu-btn" @click="toggleMenuBar"><i class="fa-solid fa-bars"></i></div>
+    <div class="nav-button" :class="{isOpenMenu: isOpenMenu}" @click="toggleMenuBar">
     <router-link class="nav-item" to="/">Home</router-link>
     <router-link class="nav-item" v-if="isAuthenticated" to="/to-do">Todo List</router-link>
     <router-link class="nav-item" v-if="!isAuthenticated" to="/register-view">Sign up</router-link>
@@ -18,7 +23,7 @@
 </template>
 
 <script>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
 import router from '@/router'
 import Swal from 'sweetalert2' // Import SweetAlert2
@@ -26,9 +31,14 @@ import Swal from 'sweetalert2' // Import SweetAlert2
 
 export default {
   setup() {
+    const isOpenMenu = ref(false);
     const store = useStore();
     const isAuthenticated = computed(() => store.state.isAuthenticated); // Trạng thái đăng nhập
     const user = computed(() => store.state.user); // Thông tin người dùng
+
+    const toggleMenuBar = () => {
+      isOpenMenu.value = !isOpenMenu.value
+    }
 
     const logout = () => {
       // Hiển thị cảnh báo xác nhận trước khi đăng xuất
@@ -57,7 +67,9 @@ export default {
     return {
       isAuthenticated,
       user,
+      isOpenMenu,
       logout,
+      toggleMenuBar,
     };
   },
 }
@@ -89,6 +101,10 @@ export default {
     cursor: pointer;
     text-decoration: none;
     color: red;
+}
+
+.nav-menu-btn {
+  display: none;
 }
 
 

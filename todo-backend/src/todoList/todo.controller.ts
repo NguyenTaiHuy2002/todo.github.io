@@ -2,7 +2,6 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query } from "@nestjs/
 import { TodoService } from "./todo.service";
 import { Todo } from "./todo.entity";
 import { TodoDto } from "src/DTO/todo.dto";
-import { log } from "console";
 
 @Controller('todo-list')
 
